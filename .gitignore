@@ -1,0 +1,14 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+.vercel
+
+# Unrelated nested projects that shouldn't ship with YoloTravel
+awesome-travel/
+github-projeler/
