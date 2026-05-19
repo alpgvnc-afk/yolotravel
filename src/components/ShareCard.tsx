@@ -60,8 +60,8 @@ export default function ShareCard({ card, plan, planId }: ShareCardProps) {
     <div className="mx-6 mt-6">
       {/* Section heading */}
       <div className="mb-3 flex items-center gap-2">
-        <Sparkles className="h-4 w-4 text-amber-500" />
-        <h3 className="text-base font-bold text-black">
+        <Sparkles className="h-4 w-4 text-amber-400" />
+        <h3 className="text-base font-bold text-white">
           {LANG === 'tr' ? 'Planını Paylaş' : 'Share Your Plan'}
         </h3>
       </div>
@@ -142,9 +142,9 @@ export default function ShareCard({ card, plan, planId }: ShareCardProps) {
       <div className="mt-3 grid grid-cols-2 gap-2">
         <button
           onClick={handleCopy}
-          className="rounded-2xl border border-gray-200 bg-white py-3 text-sm font-bold text-black active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+          className="rounded-2xl border border-white/10 bg-[#141414] py-3 text-sm font-bold text-white active:scale-[0.98] transition-transform flex items-center justify-center gap-2 hover:border-white/20"
         >
-          {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+          {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
           {copied
             ? (LANG === 'tr' ? 'Kopyalandı' : 'Copied')
             : (LANG === 'tr' ? 'Kodu Kopyala' : 'Copy Code')}
@@ -152,7 +152,7 @@ export default function ShareCard({ card, plan, planId }: ShareCardProps) {
         <button
           onClick={handleSaveImage}
           disabled={saving}
-          className="rounded-2xl bg-black py-3 text-sm font-bold text-amber-400 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-60"
+          className="rounded-2xl bg-amber-400 py-3 text-sm font-bold text-black glow-amber active:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-60"
         >
           <Download className="h-4 w-4" />
           {saving
@@ -161,7 +161,7 @@ export default function ShareCard({ card, plan, planId }: ShareCardProps) {
         </button>
       </div>
 
-      <p className="mt-2 text-center text-[11px] text-gray-400">
+      <p className="mt-2 text-center text-[11px] text-neutral-500">
         {LANG === 'tr'
           ? 'Arkadaşların bu kodu girerek planını görebilir.'
           : 'Friends can view your plan by entering this code.'}

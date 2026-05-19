@@ -6,8 +6,9 @@ import {
   Activity, Bus, Leaf, BedDouble
 } from 'lucide-react';
 import { TripPlan, TripCard, ActivityBlock } from '../types';
-import { fetchPlan, normalizePlanId } from '../services/plansService';
+import { fetchPlan, normalizeShareCode } from '../services/plansService';
 import { calculateBudget, BudgetBreakdown } from '../services/budgetService';
+import ShareButton from './ShareButton';
 import { LANG } from '../i18n';
 import { GoogleMap, useJsApiLoader, Marker, Polyline } from '@react-google-maps/api';
 
@@ -25,11 +26,11 @@ const TYPE_ICONS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  sight: 'bg-blue-50 text-blue-700 border-blue-200',
-  food: 'bg-orange-50 text-orange-700 border-orange-200',
-  activity: 'bg-purple-50 text-purple-700 border-purple-200',
-  transport: 'bg-gray-50 text-gray-700 border-gray-200',
-  rest: 'bg-green-50 text-green-700 border-green-200'
+  sight:     'bg-blue-500/15 text-blue-300 border-blue-500/30',
+  food:      'bg-orange-500/15 text-orange-300 border-orange-500/30',
+  activity:  'bg-purple-500/15 text-purple-300 border-purple-500/30',
+  transport: 'bg-white/5 text-neutral-300 border-white/10',
+  rest:      'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
 };
 
 const MARKER_COLORS: Record<string, string> = {
@@ -66,8 +67,8 @@ export default function SharedPlanScreen({ planId, onBack }: SharedPlanScreenPro
         if (!payload) {
           setError(
             LANG === 'tr'
-              ? `Bu kodla bir plan bulunamadı: ${normalizePlanId(planId) ?? planId}`
-              : `No plan found with code: ${normalizePlanId(planId) ?? planId}`
+              ? `Bu kodla bir plan bulunamadı: ${normalizeShareCode(planId) ?? planId}`
+              : `No plan found with code: ${normalizeShareCode(planId) ?? planId}`
           );
           setLoading(false);
           return;
@@ -103,9 +104,9 @@ export default function SharedPlanScreen({ planId, onBack }: SharedPlanScreenPro
           <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
             {label} {block.duration && `• ${block.duration}`}
           </div>
-          <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#141414] shadow-lg shadow-black/30">
             {pd?.photoUrl && (
-              <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100">
+              <div className="aspect-[16/9] w-full overflow-hidden bg-[#0a0a0a]">
                 <img src={pd.photoUrl} alt={block.title}
                   className="h-full w-full object-cover"
                   referrerPolicy="no-referrer" loading="lazy"
@@ -113,32 +114,32 @@ export default function SharedPlanScreen({ planId, onBack }: SharedPlanScreenPro
               </div>
             )}
             <div className="p-4">
-              <h4 className="text-base font-bold text-black flex items-start gap-2">
+              <h4 className="text-base font-bold text-white flex items-start gap-2">
                 <span>{TYPE_ICONS[block.type] || '📍'}</span>
                 <span className="flex-1">{block.title}</span>
               </h4>
               {pd?.rating && (
                 <div className="mt-1.5 flex items-center gap-2 text-xs">
                   <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                  <span className="font-bold text-black">{pd.rating.toFixed(1)}</span>
+                  <span className="font-bold text-white">{pd.rating.toFixed(1)}</span>
                   {pd.reviewCount ? (
-                    <span className="text-gray-500">({pd.reviewCount.toLocaleString()})</span>
+                    <span className="text-neutral-500">({pd.reviewCount.toLocaleString()})</span>
                   ) : null}
                 </div>
               )}
-              <p className="mt-2 text-sm text-gray-600 leading-relaxed">{block.description}</p>
+              <p className="mt-2 text-sm text-neutral-300 leading-relaxed">{block.description}</p>
               <div className="mt-3 flex items-center gap-2 flex-wrap">
                 <span className={`inline-block rounded-md px-2 py-0.5 text-[10px] font-semibold border ${TYPE_COLORS[block.type] || ''}`}>
                   {block.type}
                 </span>
                 {block.cost ? (
-                  <span className="text-xs text-gray-500 flex items-center gap-1">
+                  <span className="text-xs text-neutral-400 flex items-center gap-1">
                     <DollarSign className="h-3 w-3" />~{formatCost(block.cost)}
                   </span>
                 ) : null}
                 {pd?.googleMapsUrl && (
                   <a href={pd.googleMapsUrl} target="_blank" rel="noopener noreferrer"
-                    className="ml-auto text-xs font-semibold text-amber-600 hover:text-amber-700 flex items-center gap-1">
+                    className="ml-auto text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1">
                     Google Maps <ExternalLink className="h-3 w-3" />
                   </a>
                 )}
@@ -152,28 +153,28 @@ export default function SharedPlanScreen({ planId, onBack }: SharedPlanScreenPro
 
   if (loading) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-white">
-        <Loader2 className="h-8 w-8 text-amber-500 animate-spin mb-3" />
-        <p className="text-sm text-gray-500">
+      <div className="h-screen flex flex-col items-center justify-center bg-[#0a0a0a]">
+        <Loader2 className="h-8 w-8 text-amber-400 animate-spin mb-3" />
+        <p className="text-sm text-neutral-400">
           {LANG === 'tr' ? 'Plan yükleniyor…' : 'Loading shared plan…'}
         </p>
-        <p className="mt-1 font-mono text-xs text-gray-400">{normalizePlanId(planId) ?? planId}</p>
+        <p className="mt-1 font-mono text-xs text-neutral-500">{normalizeShareCode(planId) ?? planId}</p>
       </div>
     );
   }
 
   if (error || !plan || !card) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-white px-6 text-center">
-        <button onClick={onBack} className="absolute top-12 left-4 p-2 rounded-full bg-gray-100">
-          <ArrowLeft className="h-5 w-5 text-black" />
+      <div className="h-screen flex flex-col items-center justify-center bg-[#0a0a0a] px-6 text-center">
+        <button onClick={onBack} className="absolute top-12 left-4 p-2 rounded-full bg-white/5">
+          <ArrowLeft className="h-5 w-5 text-white" />
         </button>
         <div className="text-5xl mb-3">🤷</div>
-        <h2 className="text-lg font-bold text-black">
+        <h2 className="text-lg font-bold text-white">
           {LANG === 'tr' ? 'Plan bulunamadı' : 'Plan not found'}
         </h2>
-        <p className="mt-2 text-sm text-gray-500">{error}</p>
-        <button onClick={onBack} className="mt-6 rounded-xl bg-black px-5 py-3 text-sm font-bold text-amber-400">
+        <p className="mt-2 text-sm text-neutral-400">{error}</p>
+        <button onClick={onBack} className="mt-6 rounded-xl bg-amber-400 px-5 py-3 text-sm font-bold text-black glow-amber">
           {LANG === 'tr' ? 'Geri Dön' : 'Go Back'}
         </button>
       </div>
@@ -181,7 +182,7 @@ export default function SharedPlanScreen({ planId, onBack }: SharedPlanScreenPro
   }
 
   return (
-    <div className="h-screen overflow-y-auto bg-gradient-to-b from-amber-50/40 to-white pb-32">
+    <div className="h-screen overflow-y-auto bg-[#0a0a0a] text-neutral-100 pb-32">
       {/* Hero */}
       <div className="relative">
         <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100 relative">
@@ -190,8 +191,15 @@ export default function SharedPlanScreen({ planId, onBack }: SharedPlanScreenPro
           <button onClick={onBack} className="absolute top-12 left-4 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg">
             <ArrowLeft className="h-5 w-5 text-black" />
           </button>
-          <div className="absolute top-12 right-4 rounded-full bg-amber-400 px-3 py-1.5 text-xs font-bold text-black font-mono shadow-lg">
-            {normalizePlanId(planId)}
+          <div className="absolute top-12 right-4 flex items-center gap-2">
+            <div className="rounded-full bg-amber-400 px-3 py-1.5 text-xs font-bold text-black font-mono shadow-lg">
+              {normalizeShareCode(planId)}
+            </div>
+            <ShareButton
+              shareCode={normalizeShareCode(planId)}
+              city={card.city}
+              variant="pill"
+            />
           </div>
           <div className="absolute bottom-4 left-6 right-6 text-white">
             <div className="flex items-center gap-2 text-sm font-medium opacity-90">
@@ -257,26 +265,26 @@ export default function SharedPlanScreen({ planId, onBack }: SharedPlanScreenPro
 
       {/* Quick stats */}
       <div className="px-6 mt-4 grid grid-cols-3 gap-3">
-        <div className="rounded-2xl bg-white border border-gray-100 p-3 text-center shadow-sm">
-          <Calendar className="h-4 w-4 text-amber-500 mx-auto mb-1" />
-          <div className="text-base font-bold text-black">{card.days}</div>
-          <div className="text-[10px] text-gray-500">{LANG === 'tr' ? 'gün' : 'days'}</div>
+        <div className="rounded-2xl bg-[#141414] border border-white/5 p-3 text-center shadow-sm">
+          <Calendar className="h-4 w-4 text-amber-400 mx-auto mb-1" />
+          <div className="text-base font-bold text-white">{card.days}</div>
+          <div className="text-[10px] text-neutral-500">{LANG === 'tr' ? 'gün' : 'days'}</div>
         </div>
-        <div className="rounded-2xl bg-white border border-gray-100 p-3 text-center shadow-sm">
-          <MapPin className="h-4 w-4 text-amber-500 mx-auto mb-1" />
-          <div className="text-base font-bold text-black">{card.vibe}</div>
-          <div className="text-[10px] text-gray-500">{LANG === 'tr' ? 'tarz' : 'vibe'}</div>
+        <div className="rounded-2xl bg-[#141414] border border-white/5 p-3 text-center shadow-sm">
+          <MapPin className="h-4 w-4 text-emerald-400 mx-auto mb-1" />
+          <div className="text-base font-bold text-white">{card.vibe}</div>
+          <div className="text-[10px] text-neutral-500">{LANG === 'tr' ? 'tarz' : 'vibe'}</div>
         </div>
-        <div className="rounded-2xl bg-white border border-gray-100 p-3 text-center shadow-sm">
-          <DollarSign className="h-4 w-4 text-amber-500 mx-auto mb-1" />
-          <div className="text-base font-bold text-black">{budget ? formatCost(budget.perDay) : '—'}</div>
-          <div className="text-[10px] text-gray-500">{LANG === 'tr' ? '/gün' : '/day'}</div>
+        <div className="rounded-2xl bg-[#141414] border border-white/5 p-3 text-center shadow-sm">
+          <DollarSign className="h-4 w-4 text-amber-400 mx-auto mb-1" />
+          <div className="text-base font-bold text-white">{budget ? formatCost(budget.perDay) : '—'}</div>
+          <div className="text-[10px] text-neutral-500">{LANG === 'tr' ? '/gün' : '/day'}</div>
         </div>
       </div>
 
       {/* Summary */}
-      <div className="mx-6 mt-4 rounded-2xl bg-amber-50 border border-amber-200 p-4">
-        <p className="text-sm text-amber-900 leading-relaxed">{plan.summary}</p>
+      <div className="mx-6 mt-4 rounded-2xl bg-[#141414] border border-amber-400/20 p-4">
+        <p className="text-sm text-neutral-200 leading-relaxed">{plan.summary}</p>
       </div>
 
       {/* Day tabs */}
@@ -284,8 +292,8 @@ export default function SharedPlanScreen({ planId, onBack }: SharedPlanScreenPro
         {plan.days_plan.map(d => (
           <button key={d.day} onClick={() => setActiveDay(d.day)}
             className={`whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-bold transition-all ${
-              activeDay === d.day ? 'bg-black text-amber-400 shadow-lg'
-                : 'bg-white border border-gray-200 text-gray-600'
+              activeDay === d.day ? 'bg-amber-400 text-black shadow-lg glow-amber'
+                : 'bg-[#141414] border border-white/10 text-neutral-300'
             }`}>
             {LANG === 'tr' ? `Gün ${d.day}` : `Day ${d.day}`}
           </button>

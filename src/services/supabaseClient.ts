@@ -8,27 +8,33 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
  * ────────────────────────────────────────────────────────────────────────────
  *
  *   -- Shareable AI-generated travel plans
- *   create table if not exists public.plans (
- *     id          text        primary key,           -- short share code, e.g. "YOLO-1A2B"
- *     itinerary   jsonb       not null,              -- full TripPlan JSON (+ source card)
+ *   create table if not exists public.trip_plans (
+ *     id          uuid        primary key default gen_random_uuid(),
+ *     share_code  text        not null unique,         -- 6-char alnum, e.g. "X7K4M2"
+ *     city        text        not null,
+ *     country     text        not null,
+ *     days        int         not null,
+ *     vibe        text        not null,
+ *     plan_data   jsonb       not null,                -- full TripPlan payload
+ *     created_by  text,                                -- optional display name
  *     created_at  timestamptz not null default now()
  *   );
  *
- *   create index if not exists plans_created_at_idx
- *     on public.plans (created_at desc);
+ *   create index if not exists trip_plans_share_code_idx
+ *     on public.trip_plans (share_code);
+ *   create index if not exists trip_plans_created_at_idx
+ *     on public.trip_plans (created_at desc);
  *
- *   -- Allow anonymous read + insert for the share-link flow.
- *   -- (Lock this down later if you add accounts.)
- *   alter table public.plans enable row level security;
+ *   alter table public.trip_plans enable row level security;
  *
- *   create policy "plans_anon_read"
- *     on public.plans for select
- *     to anon using (true);
+ *   create policy "trip_plans_anon_read"
+ *     on public.trip_plans for select to anon using (true);
  *
- *   create policy "plans_anon_insert"
- *     on public.plans for insert
- *     to anon with check (true);
+ *   create policy "trip_plans_anon_insert"
+ *     on public.trip_plans for insert to anon with check (true);
  *
+ *   -- If you previously created the legacy `plans` table from an earlier version,
+ *   -- drop it after backfilling: drop table if exists public.plans;
  * ────────────────────────────────────────────────────────────────────────────
  */
 
@@ -62,4 +68,7 @@ export const getSupabase = (): SupabaseClient | null => {
   return _client;
 };
 
-export const PLANS_TABLE = 'plans';
+export const TRIP_PLANS_TABLE = 'trip_plans';
+
+// Re-export the convenient alias too — there's a singleton; calling sites can use either.
+export { getSupabase as supabase };
