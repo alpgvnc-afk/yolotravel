@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { t, LANG } from '../i18n';
 import { loadPreferences, getLastTrip } from '../services/storage';
-import { normalizePlanId, sharingEnabled } from '../services/plansService';
+import { normalizeShareCode, sharingEnabled } from '../services/plansService';
 
 interface ExploreScreenProps {
   onSelectTrip: (card: TripCard) => void;
@@ -25,12 +25,12 @@ export default function ExploreScreen({ onSelectTrip, onStartChat, onOpenSharedP
 
   const handleOpenCode = () => {
     setPlanCodeError(null);
-    const normalized = normalizePlanId(planCodeInput);
+    const normalized = normalizeShareCode(planCodeInput);
     if (!normalized) {
       setPlanCodeError(
         LANG === 'tr'
-          ? 'Geçersiz kod. Örnek: YOLO-1A2B'
-          : 'Invalid code. Format: YOLO-1A2B'
+          ? 'Geçersiz kod. 6 karakter, örn: X7K4M2'
+          : 'Invalid code. 6 characters, e.g. X7K4M2'
       );
       return;
     }
@@ -68,15 +68,15 @@ export default function ExploreScreen({ onSelectTrip, onStartChat, onOpenSharedP
   };
 
   return (
-    <div className="h-screen overflow-y-auto bg-white pb-32">
+    <div className="h-screen overflow-y-auto bg-[#0a0a0a] text-neutral-100 pb-32">
       {/* HERO */}
       <div className="relative px-6 pt-12 pb-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400 glow-amber">
               <Sparkles className="h-5 w-5 text-black" />
             </div>
-            <h2 className="text-xl font-bold tracking-tight text-black">Yolo</h2>
+            <h2 className="text-xl font-bold tracking-tight text-white">Yolo</h2>
           </div>
           <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-amber-400">
             <img src="https://picsum.photos/seed/avatar/200/200" alt="" className="h-full w-full object-cover" />
@@ -86,17 +86,17 @@ export default function ExploreScreen({ onSelectTrip, onStartChat, onOpenSharedP
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl font-bold tracking-tight text-black leading-tight"
+          className="text-4xl font-bold tracking-tight text-white leading-tight"
         >
           {LANG === 'tr' ? `Merhaba ${userName.split(' ')[0]},` : `Hi ${userName.split(' ')[0]},`}<br />
-          <span className="text-amber-500">{LANG === 'tr' ? 'nereye gidelim?' : 'where to next?'}</span>
+          <span className="text-amber-400">{LANG === 'tr' ? 'nereye gidelim?' : 'where to next?'}</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mt-3 text-sm text-gray-500 leading-relaxed"
+          className="mt-3 text-sm text-neutral-400 leading-relaxed"
         >
           {LANG === 'tr'
             ? 'Saniyeler içinde kişiselleştirilmiş rotalar, oteller ve günlük planlar.'
@@ -113,16 +113,16 @@ export default function ExploreScreen({ onSelectTrip, onStartChat, onOpenSharedP
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
               onClick={() => onSelectTrip(lastCard)}
-              className="mt-4 w-full flex items-center gap-3 rounded-2xl bg-amber-50 border border-amber-200 p-3 text-left hover:bg-amber-100 transition-colors"
+              className="mt-4 w-full flex items-center gap-3 rounded-2xl bg-[#141414] border border-amber-400/30 p-3 text-left hover:border-amber-400/60 transition-colors"
             >
               <img src={lastTrip.image || lastCard.image} alt={lastTrip.city} className="h-12 w-12 rounded-xl object-cover" referrerPolicy="no-referrer" />
               <div className="flex-1">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
                   {LANG === 'tr' ? 'Kaldığın yerden devam et' : 'Pick up where you left off'}
                 </div>
-                <div className="text-sm font-bold text-black mt-0.5">{lastTrip.city} — {lastCard.title}</div>
+                <div className="text-sm font-bold text-white mt-0.5">{lastTrip.city} — {lastCard.title}</div>
               </div>
-              <ArrowRight className="h-4 w-4 text-amber-600" />
+              <ArrowRight className="h-4 w-4 text-amber-400" />
             </motion.button>
           );
         })()}
@@ -132,7 +132,7 @@ export default function ExploreScreen({ onSelectTrip, onStartChat, onOpenSharedP
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           onClick={onStartChat}
-          className="mt-4 w-full flex items-center justify-center gap-2 rounded-2xl bg-black py-4 text-base font-bold text-amber-400 shadow-xl active:scale-[0.98] transition-transform"
+          className="mt-4 w-full flex items-center justify-center gap-2 rounded-2xl bg-amber-400 text-black py-4 text-base font-bold shadow-xl glow-amber active:scale-[0.98] transition-transform"
         >
           <Sparkles className="h-5 w-5" />
           {LANG === 'tr' ? 'AI ile Yeni Plan Oluştur' : 'Create a New Trip with AI'}
@@ -146,8 +146,8 @@ export default function ExploreScreen({ onSelectTrip, onStartChat, onOpenSharedP
           transition={{ delay: 0.25 }}
           className="mt-3"
         >
-          <div className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-100 transition-all">
-            <Ticket className="h-4 w-4 text-amber-500 flex-shrink-0" />
+          <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#141414] px-3 py-2 shadow-sm focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/20 transition-all">
+            <Ticket className="h-4 w-4 text-amber-400 flex-shrink-0" />
             <input
               type="text"
               value={planCodeInput}
@@ -156,33 +156,33 @@ export default function ExploreScreen({ onSelectTrip, onStartChat, onOpenSharedP
                 if (planCodeError) setPlanCodeError(null);
               }}
               onKeyDown={(e) => { if (e.key === 'Enter') handleOpenCode(); }}
-              placeholder={LANG === 'tr' ? 'Plan Kodu Gir (YOLO-1A2B)' : 'Enter Plan Code (YOLO-1A2B)'}
+              placeholder={LANG === 'tr' ? 'Plan Kodu Gir (X7K4M2)' : 'Have a code? (X7K4M2)'}
               autoCapitalize="characters"
               autoCorrect="off"
               spellCheck={false}
-              className="flex-1 min-w-0 bg-transparent text-sm font-mono text-black placeholder:text-gray-400 placeholder:font-sans outline-none"
+              className="flex-1 min-w-0 bg-transparent text-sm font-mono text-white placeholder:text-neutral-500 placeholder:font-sans outline-none"
             />
             <button
               onClick={handleOpenCode}
               disabled={planCodeLoading || !planCodeInput.trim()}
-              className="flex items-center gap-1 rounded-xl bg-amber-400 px-3 py-1.5 text-xs font-bold text-black active:scale-95 transition-transform disabled:opacity-40 disabled:active:scale-100"
+              className="flex items-center gap-1 rounded-xl bg-amber-400 px-3 py-1.5 text-xs font-bold text-black active:scale-95 transition-transform disabled:opacity-30 disabled:active:scale-100"
             >
               {planCodeLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ArrowRight className="h-3.5 w-3.5" />}
               {LANG === 'tr' ? 'Aç' : 'Open'}
             </button>
           </div>
           {planCodeError && (
-            <p className="mt-1.5 ml-1 text-[11px] text-red-500">{planCodeError}</p>
+            <p className="mt-1.5 ml-1 text-[11px] text-red-400">{planCodeError}</p>
           )}
         </motion.div>
       </div>
 
       {/* SECTION TITLE */}
       <div className="px-6 mb-3 flex items-center justify-between">
-        <h3 className="text-lg font-bold text-black">
+        <h3 className="text-lg font-bold text-white">
           {LANG === 'tr' ? 'Hazır AI Planları' : 'AI-Curated Trips'}
         </h3>
-        <span className="text-xs text-gray-400">{filtered.length} {LANG === 'tr' ? 'plan' : 'trips'}</span>
+        <span className="text-xs text-neutral-500">{filtered.length} {LANG === 'tr' ? 'plan' : 'trips'}</span>
       </div>
 
       {/* VIBE FILTERS */}
@@ -193,8 +193,8 @@ export default function ExploreScreen({ onSelectTrip, onStartChat, onOpenSharedP
             onClick={() => setActiveVibe(v)}
             className={`whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition-all ${
               activeVibe === v
-                ? 'bg-amber-400 text-black'
-                : 'bg-gray-50 text-gray-600 border border-gray-100'
+                ? 'bg-amber-400 text-black glow-amber'
+                : 'bg-[#141414] text-neutral-300 border border-white/10 hover:border-white/20'
             }`}
           >
             {v}
@@ -212,7 +212,7 @@ export default function ExploreScreen({ onSelectTrip, onStartChat, onOpenSharedP
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04 }}
             onClick={() => onSelectTrip(trip)}
-            className="group relative overflow-hidden rounded-3xl bg-white shadow-xl shadow-black/5 cursor-pointer"
+            className="group relative overflow-hidden rounded-3xl bg-[#141414] border border-white/5 shadow-xl shadow-black/40 cursor-pointer"
           >
             <div className="aspect-[16/10] w-full overflow-hidden bg-gray-100 relative">
               <img
@@ -241,9 +241,9 @@ export default function ExploreScreen({ onSelectTrip, onStartChat, onOpenSharedP
             </div>
 
             <div className="p-5">
-              <h5 className="text-base font-bold text-black">{trip.title}</h5>
+              <h5 className="text-base font-bold text-white">{trip.title}</h5>
 
-              <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
+              <div className="mt-2 flex items-center gap-4 text-xs text-neutral-400">
                 <div className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
                   {trip.days} {LANG === 'tr' ? 'gün' : 'days'}
@@ -256,15 +256,15 @@ export default function ExploreScreen({ onSelectTrip, onStartChat, onOpenSharedP
 
               <ul className="mt-3 space-y-1">
                 {trip.highlights.slice(0, 3).map((h, j) => (
-                  <li key={j} className="flex items-start gap-2 text-xs text-gray-600">
-                    <span className="text-amber-500 mt-0.5">✦</span>
+                  <li key={j} className="flex items-start gap-2 text-xs text-neutral-300">
+                    <span className="text-amber-400 mt-0.5">✦</span>
                     <span>{h}</span>
                   </li>
                 ))}
               </ul>
 
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-xs font-semibold text-amber-600">
+                <span className="text-xs font-semibold text-amber-400">
                   {LANG === 'tr' ? 'Planı incele' : 'See full plan'} →
                 </span>
               </div>

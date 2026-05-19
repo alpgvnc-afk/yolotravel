@@ -3,14 +3,70 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Premium dark palette — cyber-punk lean. */
+  --color-yolo-bg:        #0a0a0a;   /* deep black — app background */
+  --color-yolo-surface:   #141414;   /* slate black — cards / panels */
+  --color-yolo-surface-2: #1c1c1c;   /* one step lighter — pressed states */
+  --color-yolo-border:    #262626;   /* hairline */
+  --color-yolo-text:      #f5f5f5;   /* near-white body text */
+  --color-yolo-muted:     #a3a3a3;   /* secondary text */
+  --color-yolo-amber:     #fbbf24;   /* primary accent */
+  --color-yolo-mint:      #10b981;   /* secondary accent — neon mint */
 }
 
+:root {
+  color-scheme: dark;
+  --yolo-glow-amber: 0 0 24px rgba(251, 191, 36, 0.35);
+  --yolo-glow-mint:  0 0 24px rgba(16, 185, 129, 0.35);
+}
+
+html, body {
+  background-color: #0a0a0a;
+  color: #f5f5f5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Make every text input/textarea/select feel native-dark */
+input, textarea, select {
+  color-scheme: dark;
+}
+
+/* The mobile-frame wrapper in App.tsx — keep it dark too. */
+.bg-white { /* Tailwind utility shipped throughout the app — re-skin globally */ }
+
 @layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Cyber-punk glow on key CTAs */
+  .glow-amber  { box-shadow: var(--yolo-glow-amber); }
+  .glow-mint   { box-shadow: var(--yolo-glow-mint); }
+  .glow-amber-strong { box-shadow: 0 0 32px rgba(251, 191, 36, 0.55), 0 0 8px rgba(251, 191, 36, 0.7); }
+
+  /* Glass card */
+  .yolo-glass {
+    background: rgba(20, 20, 20, 0.7);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+
+  .yolo-card {
+    background-color: #141414;
+    border: 1px solid #262626;
+  }
+
+  .yolo-surface {
+    background-color: #1c1c1c;
+  }
+
+  /* Hairline divider on a dark card */
+  .yolo-divider { border-color: #262626; }
+
+  /* Used on hero gradients */
+  .yolo-vignette {
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
   }
 }

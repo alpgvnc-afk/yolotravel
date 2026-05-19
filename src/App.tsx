@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Screen, Destination, Hotel, Message, TripCard } from './types';
+import { normalizeShareCode } from './services/plansService';
 import WelcomeScreen from './components/WelcomeScreen';
 import ExploreScreen from './components/ExploreScreen';
 import ChatScreen from './components/ChatScreen';
@@ -34,7 +35,41 @@ export default function App() {
 
   const navigateTo = (screen: Screen) => {
     setCurrentScreen(screen);
+    // When the user navigates away from a shared-plan deep link, restore the root
+    // URL so refreshes don't keep dropping them back into the shared view.
+    if (screen !== 'shared' && typeof window !== 'undefined' && window.location.pathname.startsWith('/p/')) {
+      window.history.replaceState(null, '', '/');
+    }
   };
+
+  // Deep-link / share-URL parsing on first mount.
+  // Supports: /p/X7K4M2 (canonical), ?p=X7K4M2 (query), #/p/X7K4M2 (hash fallback).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const { pathname, search, hash } = window.location;
+    let raw: string | null = null;
+
+    const pathMatch = pathname.match(/^\/p\/([A-Za-z0-9-]+)/);
+    if (pathMatch) raw = pathMatch[1];
+
+    if (!raw) {
+      const params = new URLSearchParams(search);
+      const q = params.get('p');
+      if (q) raw = q;
+    }
+
+    if (!raw && hash.startsWith('#/p/')) {
+      raw = hash.slice('#/p/'.length);
+    }
+
+    if (raw) {
+      const code = normalizeShareCode(raw);
+      if (code) {
+        setSharedPlanId(code);
+        setCurrentScreen('shared');
+      }
+    }
+  }, []);
 
   const handleDestinationSelect = (dest: Destination) => {
     setSelectedDestination(dest);
@@ -186,7 +221,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative mx-auto max-w-md h-screen overflow-hidden bg-white shadow-2xl">
+    <div className="relative mx-auto max-w-md h-screen overflow-hidden bg-[#0a0a0a] text-neutral-100 shadow-[0_0_60px_rgba(251,191,36,0.08)]">
       <AnimatePresence mode="wait">
         {renderScreen()}
       </AnimatePresence>

@@ -12,7 +12,7 @@ export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
         className="absolute inset-0 z-0 bg-cover bg-center opacity-80"
         style={{ backgroundImage: 'url("https://picsum.photos/seed/yolo-hero/2000/1200")' }}
       />
-      <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-black/20 to-black/60" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-[#0a0a0a]/40 via-[#0a0a0a]/60 to-[#0a0a0a]" />
 
       <div className="relative z-20 flex h-full flex-col items-center justify-end px-8 pb-20 text-center">
         <motion.h1 
@@ -48,7 +48,7 @@ export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           onClick={onStart}
-          className="w-full rounded-3xl bg-amber-400 py-5 text-xl font-bold text-black"
+          className="w-full rounded-3xl bg-amber-400 py-5 text-xl font-bold text-black glow-amber-strong"
         >
           {t('getStarted')}
         </motion.button>

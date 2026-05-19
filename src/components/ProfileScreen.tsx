@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { User, Check, Trash2 } from 'lucide-react';
+import { Check, Trash2 } from 'lucide-react';
 import { UserPreferences } from '../types';
 import { loadPreferences, savePreferences, clearPreferences, loadRecentTrips } from '../services/storage';
 import { LANG } from '../i18n';
@@ -24,17 +24,15 @@ const INTEREST_OPTIONS = LANG === 'tr'
   ? ['Plaj', 'Kültür', 'Yemek', 'Doğa', 'Macera', 'Gece hayatı', 'Alışveriş', 'Sanat', 'Spor']
   : ['Beach', 'Culture', 'Food', 'Nature', 'Adventure', 'Nightlife', 'Shopping', 'Art', 'Sports'];
 
+const INPUT_CLS = 'w-full rounded-2xl border border-white/10 bg-[#141414] px-4 py-3 text-base text-white outline-none placeholder:text-neutral-500 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all';
+
 export default function ProfileScreen() {
   const [prefs, setPrefs] = useState<UserPreferences>({});
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    setPrefs(loadPreferences());
-  }, []);
+  useEffect(() => { setPrefs(loadPreferences()); }, []);
 
-  const update = (patch: Partial<UserPreferences>) => {
-    setPrefs(p => ({ ...p, ...patch }));
-  };
+  const update = (patch: Partial<UserPreferences>) => setPrefs(p => ({ ...p, ...patch }));
 
   const handleSave = () => {
     savePreferences(prefs);
@@ -60,12 +58,12 @@ export default function ProfileScreen() {
   const recentTrips = loadRecentTrips();
 
   return (
-    <div className="h-screen overflow-y-auto bg-white pb-32">
+    <div className="h-screen overflow-y-auto bg-[#0a0a0a] text-neutral-100 pb-32">
       <div className="px-6 pt-12 pb-4">
-        <h1 className="text-3xl font-bold tracking-tight text-black">
+        <h1 className="text-3xl font-bold tracking-tight text-white">
           {LANG === 'tr' ? 'Profil' : 'Profile'}
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-neutral-400 mt-1">
           {LANG === 'tr' ? 'Tercihlerini ekle, AI seni tanısın' : 'Add your preferences so AI knows you'}
         </p>
       </div>
@@ -73,7 +71,7 @@ export default function ProfileScreen() {
       <div className="px-6 space-y-6">
         {/* Name */}
         <div>
-          <label className="text-xs font-bold uppercase text-gray-500 mb-2 block">
+          <label className="text-xs font-bold uppercase text-neutral-400 mb-2 block">
             {LANG === 'tr' ? 'Adın' : 'Name'}
           </label>
           <input
@@ -81,13 +79,13 @@ export default function ProfileScreen() {
             value={prefs.name || ''}
             onChange={e => update({ name: e.target.value })}
             placeholder={LANG === 'tr' ? 'Alp' : 'Your name'}
-            className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-black outline-none focus:border-amber-400"
+            className={INPUT_CLS}
           />
         </div>
 
         {/* Home city */}
         <div>
-          <label className="text-xs font-bold uppercase text-gray-500 mb-2 block">
+          <label className="text-xs font-bold uppercase text-neutral-400 mb-2 block">
             {LANG === 'tr' ? 'Yaşadığın şehir' : 'Home city'}
           </label>
           <input
@@ -95,16 +93,16 @@ export default function ProfileScreen() {
             value={prefs.homeCity || ''}
             onChange={e => update({ homeCity: e.target.value })}
             placeholder={LANG === 'tr' ? 'Ankara' : 'London'}
-            className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-black outline-none focus:border-amber-400"
+            className={INPUT_CLS}
           />
-          <p className="text-xs text-gray-400 mt-1.5">
+          <p className="text-xs text-neutral-500 mt-1.5">
             {LANG === 'tr' ? 'AI buradan uçuş mesafesini hesaplar' : 'AI uses this for flight distance'}
           </p>
         </div>
 
         {/* Travel style */}
         <div>
-          <label className="text-xs font-bold uppercase text-gray-500 mb-2 block">
+          <label className="text-xs font-bold uppercase text-neutral-400 mb-2 block">
             {LANG === 'tr' ? 'Seyahat tarzın' : 'Travel style'}
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -114,8 +112,8 @@ export default function ProfileScreen() {
                 onClick={() => update({ travelStyle: style.value })}
                 className={`rounded-2xl py-3 px-3 text-sm font-bold transition-all text-left ${
                   prefs.travelStyle === style.value
-                    ? 'bg-amber-400 text-black shadow-md'
-                    : 'bg-gray-50 border border-gray-100 text-gray-600'
+                    ? 'bg-amber-400 text-black shadow-md glow-amber'
+                    : 'bg-[#141414] border border-white/10 text-neutral-300 hover:border-white/20'
                 }`}
               >
                 <span className="mr-2">{style.emoji}</span>
@@ -127,7 +125,7 @@ export default function ProfileScreen() {
 
         {/* Group type */}
         <div>
-          <label className="text-xs font-bold uppercase text-gray-500 mb-2 block">
+          <label className="text-xs font-bold uppercase text-neutral-400 mb-2 block">
             {LANG === 'tr' ? 'Genelde nasıl gezersin?' : 'Usually travel as?'}
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -137,8 +135,8 @@ export default function ProfileScreen() {
                 onClick={() => update({ groupType: g.value })}
                 className={`rounded-2xl py-3 px-3 text-sm font-bold transition-all ${
                   prefs.groupType === g.value
-                    ? 'bg-amber-400 text-black'
-                    : 'bg-gray-50 border border-gray-100 text-gray-600'
+                    ? 'bg-amber-400 text-black glow-amber'
+                    : 'bg-[#141414] border border-white/10 text-neutral-300'
                 }`}
               >
                 {LANG === 'tr' ? g.label : g.labelEn}
@@ -154,9 +152,9 @@ export default function ProfileScreen() {
               type="checkbox"
               checked={prefs.hasKids || false}
               onChange={e => update({ hasKids: e.target.checked })}
-              className="h-5 w-5 rounded accent-amber-500"
+              className="h-5 w-5 rounded accent-amber-400"
             />
-            <span className="text-sm text-black font-medium">
+            <span className="text-sm text-white font-medium">
               {LANG === 'tr' ? 'Çocuklu seyahat ediyorum' : 'I travel with kids'}
             </span>
           </label>
@@ -164,7 +162,7 @@ export default function ProfileScreen() {
 
         {/* Interests */}
         <div>
-          <label className="text-xs font-bold uppercase text-gray-500 mb-2 block">
+          <label className="text-xs font-bold uppercase text-neutral-400 mb-2 block">
             {LANG === 'tr' ? 'İlgi alanların' : 'Your interests'}
           </label>
           <div className="flex flex-wrap gap-2">
@@ -176,8 +174,8 @@ export default function ProfileScreen() {
                   onClick={() => toggleInterest(interest)}
                   className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
                     active
-                      ? 'bg-black text-amber-400'
-                      : 'bg-gray-50 border border-gray-100 text-gray-600'
+                      ? 'bg-emerald-500/20 border border-emerald-400/60 text-emerald-300'
+                      : 'bg-[#141414] border border-white/10 text-neutral-300'
                   }`}
                 >
                   {interest}
@@ -189,7 +187,7 @@ export default function ProfileScreen() {
 
         {/* Budget */}
         <div>
-          <label className="text-xs font-bold uppercase text-gray-500 mb-2 block">
+          <label className="text-xs font-bold uppercase text-neutral-400 mb-2 block">
             {LANG === 'tr' ? 'Tipik bütçen (kişi başı, USD)' : 'Typical budget (per person, USD)'}
           </label>
           <input
@@ -197,23 +195,23 @@ export default function ProfileScreen() {
             value={prefs.defaultBudgetUSD || ''}
             onChange={e => update({ defaultBudgetUSD: parseInt(e.target.value) || undefined })}
             placeholder="1500"
-            className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-black outline-none focus:border-amber-400"
+            className={INPUT_CLS}
           />
         </div>
 
         {/* Recent trips */}
         {recentTrips.length > 0 && (
-          <div className="border-t border-gray-100 pt-6">
-            <h3 className="text-xs font-bold uppercase text-gray-500 mb-3">
+          <div className="border-t border-white/5 pt-6">
+            <h3 className="text-xs font-bold uppercase text-neutral-400 mb-3">
               {LANG === 'tr' ? 'Son baktıkların' : 'Recent trips'}
             </h3>
             <div className="space-y-2">
               {recentTrips.map(trip => (
-                <div key={trip.cardId} className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
+                <div key={trip.cardId} className="flex items-center gap-3 rounded-xl bg-[#141414] border border-white/5 px-4 py-3">
                   <span className="text-2xl">📍</span>
                   <div className="flex-1">
-                    <div className="text-sm font-bold text-black">{trip.city}</div>
-                    <div className="text-xs text-gray-500">{trip.country}</div>
+                    <div className="text-sm font-bold text-white">{trip.city}</div>
+                    <div className="text-xs text-neutral-500">{trip.country}</div>
                   </div>
                 </div>
               ))}
@@ -222,11 +220,11 @@ export default function ProfileScreen() {
         )}
 
         {/* Save button */}
-        <div className="sticky bottom-24 bg-white pt-4 pb-2">
+        <div className="sticky bottom-24 bg-[#0a0a0a]/95 backdrop-blur-md pt-4 pb-2">
           <motion.button
             onClick={handleSave}
             whileTap={{ scale: 0.97 }}
-            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-4 text-base font-bold text-black shadow-xl"
+            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-4 text-base font-bold text-black shadow-xl glow-amber"
           >
             {saved ? (
               <>
@@ -240,7 +238,7 @@ export default function ProfileScreen() {
 
           <button
             onClick={handleClear}
-            className="w-full flex items-center justify-center gap-1.5 mt-2 py-2 text-xs font-semibold text-red-600 opacity-70 hover:opacity-100"
+            className="w-full flex items-center justify-center gap-1.5 mt-2 py-2 text-xs font-semibold text-red-400 opacity-70 hover:opacity-100"
           >
             <Trash2 className="h-3.5 w-3.5" />
             {LANG === 'tr' ? 'Tüm verileri temizle' : 'Clear all data'}

@@ -29,7 +29,7 @@ export default function TripDetailScreen({ destination, hotel, onBack }: TripDet
   const expediaPrice = Math.round(totalPrice * 1.08);
 
   return (
-    <div className="h-screen overflow-y-auto bg-white pb-32">
+    <div className="h-screen overflow-y-auto bg-[#0a0a0a] text-neutral-100 pb-32">
       {/* Hero Image */}
       <div className="relative h-80 w-full">
         <img 
@@ -54,34 +54,34 @@ export default function TripDetailScreen({ destination, hotel, onBack }: TripDet
         </div>
       </div>
 
-      <div className="relative z-10 -mt-8 flex-1 rounded-t-[40px] bg-white px-6 pt-8">
+      <div className="relative z-10 -mt-8 flex-1 rounded-t-[40px] bg-[#0a0a0a] px-6 pt-8 border-t border-white/5">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-black">{destination.name}</h1>
-          <p className="mt-2 text-lg text-gray-500">{destination.duration}</p>
-          <p className="mt-2 text-xl font-bold text-black">Toplam Paket: ₺{totalPrice.toLocaleString()}</p>
+          <h1 className="text-4xl font-bold text-white">{destination.name}</h1>
+          <p className="mt-2 text-lg text-neutral-400">{destination.duration}</p>
+          <p className="mt-2 text-xl font-bold text-amber-400">Toplam Paket: ₺{totalPrice.toLocaleString()}</p>
         </div>
 
         {/* Flight Details */}
         <div className="mt-10">
-          <h2 className="text-xl font-bold text-black mb-5">Uçuş Bilgileri</h2>
+          <h2 className="text-xl font-bold text-white mb-5">Uçuş Bilgileri</h2>
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100">
-              <Plane className="h-6 w-6 text-red-500 rotate-45" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#141414] border border-white/5">
+              <Plane className="h-6 w-6 text-amber-400 rotate-45" />
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-black">Turkish Airlines - Gidiş/Dönüş</span>
-                <span className="font-bold text-black">₺{flightPrice.toLocaleString()}</span>
+                <span className="font-bold text-white">Turkish Airlines - Gidiş/Dönüş</span>
+                <span className="font-bold text-white">₺{flightPrice.toLocaleString()}</span>
               </div>
-              <p className="text-sm text-gray-400">IST - {destination.name.slice(0, 3).toUpperCase()} | yaklaşık 4s</p>
+              <p className="text-sm text-neutral-500">IST - {destination.name.slice(0, 3).toUpperCase()} | yaklaşık 4s</p>
             </div>
           </div>
         </div>
 
         {/* Hotel Details */}
         <div className="mt-10">
-          <h2 className="text-xl font-bold text-black mb-5">Seçilen Otel</h2>
-          <div className="rounded-3xl border border-gray-100 p-4 flex gap-4 shadow-sm">
+          <h2 className="text-xl font-bold text-white mb-5">Seçilen Otel</h2>
+          <div className="rounded-3xl border border-white/5 bg-[#141414] p-4 flex gap-4 shadow-lg shadow-black/30">
             <img
               src={selectedHotel.image}
               className="h-20 w-20 rounded-2xl object-cover shrink-0"
@@ -89,57 +89,57 @@ export default function TripDetailScreen({ destination, hotel, onBack }: TripDet
               referrerPolicy="no-referrer"
             />
             <div className="flex-1">
-              <h4 className="font-bold text-black">{selectedHotel.name}</h4>
+              <h4 className="font-bold text-white">{selectedHotel.name}</h4>
               <div className="flex gap-0.5 mt-1">
                 {[...Array(selectedHotel.stars)].map((_, i) => (
                   <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
                 ))}
-                <span className="text-[10px] font-bold text-black ml-1">{selectedHotel.rating.toFixed(1)}</span>
+                <span className="text-[10px] font-bold text-white ml-1">{selectedHotel.rating.toFixed(1)}</span>
               </div>
-              <p className="text-xs text-gray-500 mt-1 line-clamp-2">{selectedHotel.description}</p>
-              <p className="text-sm font-bold text-black mt-1">₺{selectedHotel.pricePerNight.toLocaleString()} / gece × {nightCount}</p>
+              <p className="text-xs text-neutral-400 mt-1 line-clamp-2">{selectedHotel.description}</p>
+              <p className="text-sm font-bold text-amber-400 mt-1">₺{selectedHotel.pricePerNight.toLocaleString()} / gece × {nightCount}</p>
             </div>
           </div>
         </div>
 
         {/* Price Comparison */}
         <div className="mt-10 mb-8">
-          <h2 className="text-xl font-bold text-black mb-5">Fiyat Karşılaştırma</h2>
+          <h2 className="text-xl font-bold text-white mb-5">Fiyat Karşılaştırma</h2>
           <div className="space-y-4">
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-black">Yolo:</span>
+                <span className="text-sm font-bold text-white">Yolo:</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-black">₺{totalPrice.toLocaleString()}</span>
-                  <span className="text-xs font-bold text-green-500">En uygun!</span>
+                  <span className="text-sm font-bold text-white">₺{totalPrice.toLocaleString()}</span>
+                  <span className="text-xs font-bold text-emerald-400">En uygun!</span>
                 </div>
               </div>
-              <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: '70%' }}
-                  className="h-full bg-amber-400"
+                  className="h-full bg-amber-400 glow-amber"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-500">Booking.com:</span>
-                <span className="text-sm font-bold text-black">₺{bookingPrice.toLocaleString()}</span>
+                <span className="text-sm font-medium text-neutral-400">Booking.com:</span>
+                <span className="text-sm font-bold text-white">₺{bookingPrice.toLocaleString()}</span>
               </div>
-              <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden text-gray-300">
-                <div className="h-full bg-current w-[85%]" />
+              <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden">
+                <div className="h-full bg-neutral-600 w-[85%]" />
               </div>
             </div>
 
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-500">Expedia:</span>
-                <span className="text-sm font-bold text-black">₺{expediaPrice.toLocaleString()}</span>
+                <span className="text-sm font-medium text-neutral-400">Expedia:</span>
+                <span className="text-sm font-bold text-white">₺{expediaPrice.toLocaleString()}</span>
               </div>
-              <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden text-gray-300">
-                <div className="h-full bg-current w-[80%]" />
+              <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden">
+                <div className="h-full bg-neutral-600 w-[80%]" />
               </div>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function TripDetailScreen({ destination, hotel, onBack }: TripDet
 
         <button
           id="book-now-final"
-          className="w-full rounded-2xl bg-amber-400 py-5 text-xl font-bold text-black shadow-lg active:scale-[0.98] transition-transform"
+          className="w-full rounded-2xl bg-amber-400 py-5 text-xl font-bold text-black shadow-lg glow-amber-strong active:scale-[0.98] transition-transform"
         >
           Rezervasyon Yap
         </button>

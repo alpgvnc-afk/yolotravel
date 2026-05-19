@@ -25,13 +25,13 @@ export default function RecommendationsScreen({
   const isFromChat = destinations && destinations.length > 0;
 
   return (
-    <div className="relative h-screen overflow-y-auto bg-white pb-32">
+    <div className="relative h-screen overflow-y-auto bg-[#0a0a0a] text-neutral-100 pb-32">
       <div className="px-6 pt-12 pb-6">
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
-            <ArrowLeft className="h-6 w-6 text-black" />
+          <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-white/5">
+            <ArrowLeft className="h-6 w-6 text-white" />
           </button>
-          <h1 className="text-2xl font-bold text-black">{t('recTitle')}</h1>
+          <h1 className="text-2xl font-bold text-white">{t('recTitle')}</h1>
         </div>
 
         <div className="grid gap-8">
@@ -41,9 +41,9 @@ export default function RecommendationsScreen({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.1 }}
-              className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-xl shadow-black/5"
+              className="overflow-hidden rounded-3xl border border-white/5 bg-[#141414] shadow-xl shadow-black/40"
             >
-              <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100">
+              <div className="aspect-[16/9] w-full overflow-hidden bg-[#0a0a0a]">
                 <img
                   src={dest.image}
                   alt={dest.name}
@@ -52,21 +52,21 @@ export default function RecommendationsScreen({
                 />
               </div>
               <div className="p-6">
-                <h3 className="text-2xl font-bold text-black">{dest.name}</h3>
-                <p className="mt-1 text-lg font-medium text-gray-600">
+                <h3 className="text-2xl font-bold text-white">{dest.name}</h3>
+                <p className="mt-1 text-lg font-medium text-neutral-400">
                   {LANG === 'tr' ? `Tahmini fiyat: ₺${dest.price.toLocaleString()}` : `Estimated: $${Math.round(dest.price / 35).toLocaleString()}`}
                 </p>
 
                 <div className="mt-4">
-                  <p className="text-sm font-bold text-black">{t('matchReason')}:</p>
-                  <p className="mt-1 text-sm text-gray-500 leading-relaxed">
+                  <p className="text-sm font-bold text-amber-400">{t('matchReason')}:</p>
+                  <p className="mt-1 text-sm text-neutral-300 leading-relaxed">
                     {dest.matchReason}
                   </p>
                 </div>
 
                 <button
                   onClick={() => onSelect(dest)}
-                  className="mt-6 w-full rounded-2xl bg-amber-400 py-4 text-lg font-bold text-black active:scale-[0.98] transition-transform"
+                  className="mt-6 w-full rounded-2xl bg-amber-400 py-4 text-lg font-bold text-black active:scale-[0.98] transition-transform glow-amber"
                 >
                   {t('viewHotels')}
                 </button>
@@ -84,7 +84,7 @@ export default function RecommendationsScreen({
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.3, type: 'spring' }}
             onClick={onOpenChat}
-            className="pointer-events-auto flex h-14 items-center gap-2 rounded-full bg-zinc-900 px-5 text-amber-400 shadow-lg active:scale-95 transition-transform"
+            className="pointer-events-auto flex h-14 items-center gap-2 rounded-full bg-amber-400 px-5 text-black shadow-lg glow-amber-strong active:scale-95 transition-transform"
           >
             <MessageCircle className="h-5 w-5" />
             <span className="text-sm font-bold">{t('continueChat')}</span>

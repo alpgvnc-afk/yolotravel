@@ -8,6 +8,7 @@ import { bookingSearchUrl } from '../services/affiliate';
 import { loadPreferences, addRecentTrip } from '../services/storage';
 import { savePlan, sharingEnabled } from '../services/plansService';
 import ShareCard from './ShareCard';
+import ShareButton from './ShareButton';
 import { t, LANG } from '../i18n';
 import { GoogleMap, useJsApiLoader, Marker, Polyline, InfoWindow } from '@react-google-maps/api';
 
@@ -31,6 +32,15 @@ const TYPE_COLORS: Record<string, string> = {
   activity: 'bg-purple-50 text-purple-700 border-purple-200',
   transport: 'bg-gray-50 text-gray-700 border-gray-200',
   rest: 'bg-green-50 text-green-700 border-green-200'
+};
+
+// Dark-mode pill colors — same hues, deeper backgrounds, brighter text.
+const TYPE_COLORS_DARK: Record<string, string> = {
+  sight:     'bg-blue-500/15 text-blue-300 border-blue-500/30',
+  food:      'bg-orange-500/15 text-orange-300 border-orange-500/30',
+  activity:  'bg-purple-500/15 text-purple-300 border-purple-500/30',
+  transport: 'bg-white/5 text-neutral-300 border-white/10',
+  rest:      'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
 };
 
 const MARKER_COLORS: Record<string, string> = {
@@ -109,8 +119,12 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
         // Wrapped so a Supabase outage never breaks the itinerary view.
         if (sharingEnabled()) {
           try {
-            const id = await savePlan({ card, plan: enrichedPlan });
-            if (!cancelled) setPlanId(id);
+            const code = await savePlan({
+              card,
+              plan: enrichedPlan,
+              createdBy: userPreferences?.name ?? null
+            });
+            if (!cancelled) setPlanId(code);
           } catch (e: any) {
             if (!cancelled) {
               console.error('[ItineraryScreen] savePlan failed', e);
@@ -147,13 +161,13 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
           {icon}
         </div>
         <div className="ml-2 pb-6">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">
             {label} {block.duration && `• ${block.duration}`}
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#141414] shadow-lg shadow-black/30">
             {pd?.photoUrl && (
-              <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100">
+              <div className="aspect-[16/9] w-full overflow-hidden bg-[#0a0a0a]">
                 <img
                   src={pd.photoUrl}
                   alt={block.title}
@@ -168,7 +182,7 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
             )}
 
             <div className="p-4">
-              <h4 className="text-base font-bold text-black flex items-start gap-2">
+              <h4 className="text-base font-bold text-white flex items-start gap-2">
                 <span>{TYPE_ICONS[block.type] || '📍'}</span>
                 <span className="flex-1">{block.title}</span>
               </h4>
@@ -177,22 +191,22 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
                 <div className="mt-1.5 flex items-center gap-2 text-xs">
                   <div className="flex items-center gap-1">
                     <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                    <span className="font-bold text-black">{pd.rating.toFixed(1)}</span>
+                    <span className="font-bold text-white">{pd.rating.toFixed(1)}</span>
                   </div>
                   {pd.reviewCount ? (
-                    <span className="text-gray-500">({pd.reviewCount.toLocaleString()} {LANG === 'tr' ? 'değerlendirme' : 'reviews'})</span>
+                    <span className="text-neutral-500">({pd.reviewCount.toLocaleString()} {LANG === 'tr' ? 'değerlendirme' : 'reviews'})</span>
                   ) : null}
                 </div>
               )}
 
-              <p className="mt-2 text-sm text-gray-600 leading-relaxed">{block.description}</p>
+              <p className="mt-2 text-sm text-neutral-300 leading-relaxed">{block.description}</p>
 
               <div className="mt-3 flex items-center gap-2 flex-wrap">
-                <span className={`inline-block rounded-md px-2 py-0.5 text-[10px] font-semibold border ${TYPE_COLORS[block.type] || ''}`}>
+                <span className={`inline-block rounded-md px-2 py-0.5 text-[10px] font-semibold border ${TYPE_COLORS_DARK[block.type] || ''}`}>
                   {block.type}
                 </span>
                 {block.cost ? (
-                  <span className="text-xs text-gray-500 flex items-center gap-1">
+                  <span className="text-xs text-neutral-400 flex items-center gap-1">
                     <DollarSign className="h-3 w-3" />
                     ~{formatCost(block.cost)}
                   </span>
@@ -202,7 +216,7 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
                     href={pd.googleMapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ml-auto text-xs font-semibold text-amber-600 hover:text-amber-700 flex items-center gap-1"
+                    className="ml-auto text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1"
                   >
                     Google Maps <ExternalLink className="h-3 w-3" />
                   </a>
@@ -216,7 +230,7 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
   };
 
   return (
-    <div className="h-screen overflow-y-auto bg-gradient-to-b from-amber-50/40 to-white pb-32">
+    <div className="h-screen overflow-y-auto bg-[#0a0a0a] text-neutral-100 pb-32">
       {/* Hero */}
       <div className="relative">
         <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100 relative">
@@ -226,6 +240,13 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
           <button onClick={onBack} className="absolute top-12 left-4 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg">
             <ArrowLeft className="h-5 w-5 text-black" />
           </button>
+
+          {/* Top-right Share button (shown once Supabase has minted a code) */}
+          {sharingEnabled() && (
+            <div className="absolute top-12 right-4">
+              <ShareButton shareCode={planId} city={card.city} variant="pill" />
+            </div>
+          )}
 
           <div className="absolute bottom-4 left-6 right-6 text-white">
             <div className="flex items-center gap-2 text-sm font-medium opacity-90">
@@ -240,20 +261,20 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
 
       {/* Quick stats */}
       <div className="px-6 mt-4 grid grid-cols-3 gap-3">
-        <div className="rounded-2xl bg-white border border-gray-100 p-3 text-center shadow-sm">
-          <Calendar className="h-4 w-4 text-amber-500 mx-auto mb-1" />
-          <div className="text-base font-bold text-black">{card.days}</div>
-          <div className="text-[10px] text-gray-500">{LANG === 'tr' ? 'gün' : 'days'}</div>
+        <div className="rounded-2xl bg-[#141414] border border-white/5 p-3 text-center shadow-sm">
+          <Calendar className="h-4 w-4 text-amber-400 mx-auto mb-1" />
+          <div className="text-base font-bold text-white">{card.days}</div>
+          <div className="text-[10px] text-neutral-500">{LANG === 'tr' ? 'gün' : 'days'}</div>
         </div>
-        <div className="rounded-2xl bg-white border border-gray-100 p-3 text-center shadow-sm">
-          <DollarSign className="h-4 w-4 text-amber-500 mx-auto mb-1" />
-          <div className="text-base font-bold text-black">{formatCost(card.estimatedCost)}</div>
-          <div className="text-[10px] text-gray-500">{LANG === 'tr' ? 'tahmini' : 'estimated'}</div>
+        <div className="rounded-2xl bg-[#141414] border border-white/5 p-3 text-center shadow-sm">
+          <DollarSign className="h-4 w-4 text-amber-400 mx-auto mb-1" />
+          <div className="text-base font-bold text-white">{formatCost(card.estimatedCost)}</div>
+          <div className="text-[10px] text-neutral-500">{LANG === 'tr' ? 'tahmini' : 'estimated'}</div>
         </div>
-        <div className="rounded-2xl bg-white border border-gray-100 p-3 text-center shadow-sm">
-          <MapPin className="h-4 w-4 text-amber-500 mx-auto mb-1" />
-          <div className="text-base font-bold text-black">{card.vibe}</div>
-          <div className="text-[10px] text-gray-500">{LANG === 'tr' ? 'tarz' : 'vibe'}</div>
+        <div className="rounded-2xl bg-[#141414] border border-white/5 p-3 text-center shadow-sm">
+          <MapPin className="h-4 w-4 text-emerald-400 mx-auto mb-1" />
+          <div className="text-base font-bold text-white">{card.vibe}</div>
+          <div className="text-[10px] text-neutral-500">{LANG === 'tr' ? 'tarz' : 'vibe'}</div>
         </div>
       </div>
 
@@ -314,18 +335,18 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
       )}
 
       {loading && (
-        <div className="px-6 mt-4 space-y-3 opacity-50">
-          <div className="rounded-2xl bg-gray-100 animate-pulse h-64" />
+        <div className="px-6 mt-4 space-y-3 opacity-60">
+          <div className="rounded-2xl bg-[#141414] animate-pulse h-64" />
           <div className="space-y-3 mt-4">
-            <div className="rounded-xl bg-gray-100 animate-pulse h-32" />
-            <div className="rounded-xl bg-gray-100 animate-pulse h-32" />
-            <div className="rounded-xl bg-gray-100 animate-pulse h-32" />
+            <div className="rounded-xl bg-[#141414] animate-pulse h-32" />
+            <div className="rounded-xl bg-[#141414] animate-pulse h-32" />
+            <div className="rounded-xl bg-[#141414] animate-pulse h-32" />
           </div>
         </div>
       )}
 
       {error && (
-        <div className="m-6 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div className="m-6 rounded-xl bg-red-950/40 border border-red-500/40 px-4 py-3 text-sm text-red-300">
           {error}
         </div>
       )}
@@ -333,11 +354,11 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
       {plan && (
         <>
           {/* Summary */}
-          <div className="mx-6 mt-4 rounded-2xl bg-amber-50 border border-amber-200 p-4">
-            <p className="text-sm text-amber-900 leading-relaxed">{plan.summary}</p>
+          <div className="mx-6 mt-4 rounded-2xl bg-[#141414] border border-amber-400/20 p-4">
+            <p className="text-sm text-neutral-200 leading-relaxed">{plan.summary}</p>
             <button
               onClick={regeneratePlan}
-              className="mt-3 text-xs font-bold text-amber-700 hover:text-amber-800 active:scale-95 transition-transform flex items-center gap-1"
+              className="mt-3 text-xs font-bold text-amber-400 hover:text-amber-300 active:scale-95 transition-transform flex items-center gap-1"
             >
               🔄 {LANG === 'tr' ? 'Yeni plan öner' : 'Suggest a different plan'}
             </button>
@@ -351,8 +372,8 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
                 onClick={() => setActiveDay(d.day)}
                 className={`whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-bold transition-all ${
                   activeDay === d.day
-                    ? 'bg-black text-amber-400 shadow-lg'
-                    : 'bg-white border border-gray-200 text-gray-600'
+                    ? 'bg-amber-400 text-black shadow-lg glow-amber'
+                    : 'bg-[#141414] border border-white/10 text-neutral-300'
                 }`}
               >
                 {LANG === 'tr' ? `Gün ${d.day}` : `Day ${d.day}`}
@@ -458,7 +479,7 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
                 href={bookingSearchUrl(card.city)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ml-10 mt-1 inline-flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 transition-colors"
+                className="ml-10 mt-1 inline-flex items-center gap-2 rounded-xl bg-[#141414] border border-amber-400/30 px-4 py-2.5 text-xs font-semibold text-amber-300 hover:bg-[#1c1c1c] transition-colors"
               >
                 <BedDouble className="h-3.5 w-3.5" />
                 {LANG === 'tr'
@@ -470,7 +491,7 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
           ))}
 
           {/* Hotel suggestion → direkt Booking affiliate'a */}
-          <div className="mx-6 mt-6 rounded-2xl bg-gradient-to-br from-zinc-900 to-black p-5 text-white">
+          <div className="mx-6 mt-6 rounded-2xl bg-[#141414] border border-white/5 p-5 text-white">
             <div className="flex items-start gap-3 mb-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400">
                 <Hotel className="h-5 w-5 text-black" />
@@ -493,7 +514,7 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
                 href={bookingSearchUrl(`${plan.recommendedHotelArea}, ${card.city}`)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-xl bg-amber-400 py-3 text-xs font-bold text-black text-center active:scale-[0.98] transition-transform flex items-center justify-center gap-1"
+                className="rounded-xl bg-amber-400 py-3 text-xs font-bold text-black text-center active:scale-[0.98] transition-transform flex items-center justify-center gap-1 glow-amber"
               >
                 Booking.com <ExternalLink className="h-3 w-3" />
               </a>
@@ -503,7 +524,7 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
           {/* Shareable plan card — only shown after Supabase save succeeds */}
           {planId && <ShareCard card={card} plan={plan} planId={planId} />}
           {saveError && !planId && (
-            <div className="mx-6 mt-4 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2 text-xs text-amber-800">
+            <div className="mx-6 mt-4 rounded-xl bg-amber-500/10 border border-amber-500/30 px-4 py-2 text-xs text-amber-300">
               {LANG === 'tr'
                 ? `Paylaşım kodu oluşturulamadı: ${saveError}`
                 : `Could not create share code: ${saveError}`}
@@ -513,14 +534,14 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
           {/* Tips */}
           {plan.tips.length > 0 && (
             <div className="mx-6 mt-6">
-              <h3 className="flex items-center gap-2 text-base font-bold text-black mb-3">
-                <Lightbulb className="h-4 w-4 text-amber-500" />
+              <h3 className="flex items-center gap-2 text-base font-bold text-white mb-3">
+                <Lightbulb className="h-4 w-4 text-amber-400" />
                 {LANG === 'tr' ? 'Pratik İpuçları' : 'Practical Tips'}
               </h3>
               <ul className="space-y-2">
                 {plan.tips.map((tip, i) => (
-                  <li key={i} className="rounded-xl bg-white border border-gray-100 px-4 py-3 text-sm text-gray-700 flex gap-2">
-                    <span className="text-amber-500">✦</span>
+                  <li key={i} className="rounded-xl bg-[#141414] border border-white/5 px-4 py-3 text-sm text-neutral-300 flex gap-2">
+                    <span className="text-amber-400">✦</span>
                     <span>{tip}</span>
                   </li>
                 ))}
