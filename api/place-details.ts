@@ -58,12 +58,15 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json({ place: null });
     }
 
-    // İlk fotoğraftan media URL oluştur
+    // İlk fotoğraftan media URL oluştur.
+    // ÖNEMLİ: Google'a key gömülü doğrudan URL göndermek YERİNE kendi
+    // /api/place-photo proxy'mizi kullanıyoruz. Böylece:
+    //   - GOOGLE_MAPS_KEY tarayıcıya sızmıyor,
+    //   - HTTP referrer kısıtlamaları tetiklenmiyor (server-to-server fetch).
     let photoUrl: string | null = null;
     if (place.photos && place.photos.length > 0) {
-      const photoName = place.photos[0].name;
-      // Photo media URL - returns redirect to image
-      photoUrl = `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=800&key=${apiKey}`;
+      const photoName = place.photos[0].name; // "places/.../photos/..."
+      photoUrl = `/api/place-photo?name=${encodeURIComponent(photoName)}&w=800`;
     }
 
     return res.status(200).json({

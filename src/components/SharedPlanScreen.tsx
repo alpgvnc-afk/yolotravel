@@ -33,6 +33,14 @@ const TYPE_COLORS: Record<string, string> = {
   rest:      'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
 };
 
+const PLACEHOLDER_GRADIENT: Record<string, string> = {
+  sight:     'linear-gradient(135deg, #1e3a8a 0%, #0a0a0a 100%)',
+  food:      'linear-gradient(135deg, #7c2d12 0%, #0a0a0a 100%)',
+  activity:  'linear-gradient(135deg, #581c87 0%, #0a0a0a 100%)',
+  transport: 'linear-gradient(135deg, #374151 0%, #0a0a0a 100%)',
+  rest:      'linear-gradient(135deg, #064e3b 0%, #0a0a0a 100%)'
+};
+
 const MARKER_COLORS: Record<string, string> = {
   sight: '#3b82f6',
   food: '#f97316',
@@ -105,14 +113,21 @@ export default function SharedPlanScreen({ planId, onBack }: SharedPlanScreenPro
             {label} {block.duration && `• ${block.duration}`}
           </div>
           <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#141414] shadow-lg shadow-black/30">
-            {pd?.photoUrl && (
-              <div className="aspect-[16/9] w-full overflow-hidden bg-[#0a0a0a]">
-                <img src={pd.photoUrl} alt={block.title}
-                  className="h-full w-full object-cover"
-                  referrerPolicy="no-referrer" loading="lazy"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <div className="aspect-[16/9] w-full overflow-hidden relative">
+              <div
+                className="absolute inset-0 flex items-center justify-center text-3xl opacity-60"
+                style={{ background: PLACEHOLDER_GRADIENT[block.type] || PLACEHOLDER_GRADIENT.sight }}
+                aria-hidden="true"
+              >
+                {TYPE_ICONS[block.type] || '📍'}
               </div>
-            )}
+              {pd?.photoUrl && (
+                <img src={pd.photoUrl} alt={block.title}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              )}
+            </div>
             <div className="p-4">
               <h4 className="text-base font-bold text-white flex items-start gap-2">
                 <span>{TYPE_ICONS[block.type] || '📍'}</span>
