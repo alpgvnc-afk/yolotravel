@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState, ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Loader2, MapPin, Clock, DollarSign, Sun, Sunset, Moon, Hotel, Lightbulb, Calendar, Star, ExternalLink, BedDouble } from 'lucide-react';
+import { ArrowLeft, Loader2, MapPin, Clock, DollarSign, Sun, Sunset, Moon, Hotel, Lightbulb, Calendar, Star, ExternalLink, BedDouble, Pencil, X, RotateCcw } from 'lucide-react';
 import { TripCard, TripPlan, ActivityBlock } from '../types';
 import { generateItinerary } from '../services/claudeService';
 import { fetchPlaceDetails } from '../services/placesService';
 import { bookingSearchUrl } from '../services/affiliate';
 import { loadPreferences, addRecentTrip } from '../services/storage';
-import { savePlan, sharingEnabled } from '../services/plansService';
+import { savePlan, sharingEnabled, updatePlan } from '../services/plansService';
 import ShareCard from './ShareCard';
 import ShareButton from './ShareButton';
+import PlanEditor from './PlanEditor';
+import { getDaySpots } from '../utils/planSpots';
 import { t, LANG } from '../i18n';
 import { GoogleMap, useJsApiLoader, Marker, Polyline, InfoWindow } from '@react-google-maps/api';
 
@@ -70,6 +72,9 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
   const [activeMarker, setActiveMarker] = useState<string | null>(null);
   const [planId, setPlanId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; retry?: () => void } | null>(null);
 
   const { isLoaded: mapsLoaded } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY || ''
@@ -84,7 +89,7 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
     const seen = new Set<string>();
     const out: { name: string; photoUrl: string }[] = [];
     for (const day of plan.days_plan) {
-      for (const block of [day.morning, day.afternoon, day.evening]) {
+      for (const block of getDaySpots(day)) {
         const url = block.placeDetails?.photoUrl;
         if (!url) continue;
         const name = block.placeDetails?.name || block.title;
@@ -175,6 +180,31 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
       cancelled = true;
     };
   }, [card.id, variantSeed]);
+
+  const handleDiscard = () => setEditMode(false);
+
+  const persistEdit = async (updated: TripPlan) => {
+    if (!planId) return;
+    setSavingEdit(true);
+    try {
+      await updatePlan(planId, { card, plan: updated });
+      setToast(null);
+    } catch {
+      setToast({
+        msg: LANG === 'tr' ? 'Kaydedilemedi.' : "Couldn't save.",
+        retry: () => persistEdit(updated),
+      });
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleSavePlan = (updated: TripPlan) => {
+    // optimistic: update UI + exit edit immediately, persist in background
+    setPlan(updated);
+    setEditMode(false);
+    if (sharingEnabled() && planId) persistEdit(updated);
+  };
 
   const regeneratePlan = () => {
     setVariantSeed(s => s + 1);
@@ -281,12 +311,21 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
             <ArrowLeft className="h-5 w-5 text-black" />
           </button>
 
-          {/* Top-right Share button (shown once Supabase has minted a code) */}
-          {sharingEnabled() && (
-            <div className="absolute top-12 right-4">
+          {/* Top-right actions — Edit Plan toggle + Share */}
+          <div className="absolute top-12 right-4 flex items-center gap-2">
+            {plan && !editMode && (
+              <button
+                onClick={() => setEditMode(true)}
+                className="flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-3 py-2 shadow-lg backdrop-blur-md active:scale-95 transition"
+              >
+                <Pencil className="h-4 w-4 text-amber-400" />
+                <span className="text-xs font-bold text-white">{LANG === 'tr' ? 'Düzenle' : 'Edit Plan'}</span>
+              </button>
+            )}
+            {sharingEnabled() && (
               <ShareButton shareCode={planId} city={card.city} variant="pill" />
-            </div>
-          )}
+            )}
+          </div>
 
           <div className="absolute bottom-4 left-6 right-6 text-white">
             <div className="flex items-center gap-2 text-sm font-medium opacity-90">
@@ -391,7 +430,33 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
         </div>
       )}
 
-      {plan && (
+      {plan && editMode && (
+        <PlanEditor
+          plan={plan}
+          city={card.city}
+          vibe={card.vibe}
+          saving={savingEdit}
+          onSave={handleSavePlan}
+          onDiscard={handleDiscard}
+        />
+      )}
+
+      {toast && (
+        <div className="fixed inset-x-0 bottom-24 z-50 flex justify-center px-6">
+          <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-[#1a1a1a] px-4 py-3 shadow-2xl">
+            <span className="text-sm text-white">{toast.msg}</span>
+            {toast.retry && (
+              <button onClick={toast.retry} className="flex items-center gap-1 text-xs font-bold text-amber-400">
+                <RotateCcw className="h-3.5 w-3.5" />
+                {LANG === 'tr' ? 'Tekrar dene' : 'Retry'}
+              </button>
+            )}
+            <button onClick={() => setToast(null)} className="text-white/50"><X className="h-4 w-4" /></button>
+          </div>
+        </div>
+      )}
+
+      {plan && !editMode && (
         <>
           {/* Summary */}
           <div className="mx-6 mt-4 rounded-2xl bg-[#141414] border border-amber-400/20 p-4">
@@ -426,11 +491,9 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
             const currentDay = plan.days_plan.find(d => d.day === activeDay);
             if (!currentDay || !mapsLoaded) return null;
 
-            const blocks = [
-              { ...currentDay.morning, label: LANG === 'tr' ? 'Sabah' : 'Morning' },
-              { ...currentDay.afternoon, label: LANG === 'tr' ? 'Öğleden Sonra' : 'Afternoon' },
-              { ...currentDay.evening, label: LANG === 'tr' ? 'Akşam' : 'Evening' }
-            ].filter(b => b.lat && b.lng);
+            const blocks = getDaySpots(currentDay)
+              .map((b, i) => ({ ...b, label: b.time || String(i + 1) }))
+              .filter(b => b.lat && b.lng);
 
             if (blocks.length === 0) return null;
 
@@ -510,9 +573,15 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
               {/* Vertical line */}
               <div className="absolute left-3.5 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-300 via-amber-300 to-transparent" />
 
-              {renderActivity(day.morning, <Sun className="h-4 w-4" />, LANG === 'tr' ? 'Sabah' : 'Morning')}
-              {renderActivity(day.afternoon, <Sunset className="h-4 w-4" />, LANG === 'tr' ? 'Öğleden Sonra' : 'Afternoon')}
-              {renderActivity(day.evening, <Moon className="h-4 w-4" />, LANG === 'tr' ? 'Akşam' : 'Evening')}
+              {getDaySpots(day).map((spot, si) => (
+                <div key={spot.id}>
+                  {renderActivity(
+                    spot,
+                    si === 0 ? <Sun className="h-4 w-4" /> : si === 1 ? <Sunset className="h-4 w-4" /> : <Moon className="h-4 w-4" />,
+                    spot.time || (LANG === 'tr' ? `Durak ${si + 1}` : `Stop ${si + 1}`)
+                  )}
+                </div>
+              ))}
 
               {/* Bu gün için otel ara mini buton */}
               <a
@@ -570,6 +639,7 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
               vibe={card.vibe}
               shareCode={planId}
               places={sharePlaces}
+              plan={plan}
             />
           )}
           {saveError && !planId && (

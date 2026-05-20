@@ -638,3 +638,88 @@ CRITICAL: Provide REAL lat/lng coordinates for every activity. Don't make up coo
     days_plan: input.days_plan || []
   };
 }
+
+/* ── Plan-editor: ask Claude for alternative spots ──────────────────────── */
+
+export interface AlternativeSpot {
+  name: string;
+  description: string;
+  type: 'sight' | 'food' | 'activity' | 'transport' | 'rest';
+  duration?: string;
+}
+
+const ALTERNATIVES_TOOL = {
+  name: 'suggest_alternatives',
+  description: 'Return 3 alternative places for a spot in a travel itinerary.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      alternatives: {
+        type: 'array',
+        description: 'Exactly 3 alternative places.',
+        items: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Real, existing place name.' },
+            description: { type: 'string', description: 'One short sentence on why it fits.' },
+            type: { type: 'string', enum: ['sight', 'food', 'activity', 'transport', 'rest'] },
+            duration: { type: 'string', description: 'e.g. "1 hour", "lunch" (optional).' }
+          },
+          required: ['name', 'description', 'type']
+        }
+      }
+    },
+    required: ['alternatives']
+  }
+};
+
+/**
+ * Ask Claude for 3 alternatives to a given spot, in the plan's vibe.
+ * Used by the "Ask AI for alternative" action in the Plan Editor.
+ */
+export async function askForAlternative(params: {
+  city: string;
+  vibe: string;
+  day: number;
+  category: string;     // spot type/role, e.g. "food", "sight"
+  currentSpot: string;  // name of the spot being replaced
+}): Promise<AlternativeSpot[]> {
+  if (!API_KEY) throw new Error('VITE_CLAUDE_API_KEY missing.');
+
+  const userPrompt = LANG === 'tr'
+    ? `${params.city} şehrinde, Gün ${params.day} için "${params.currentSpot}" yerine 3 alternatif öner. Kategori: ${params.category}. Tarz: ${params.vibe}. Sadece gerçek, var olan mekan adları kullan. Her biri için tek cümlelik kısa açıklama yaz.`
+    : `Suggest 3 alternatives for "${params.currentSpot}" on Day ${params.day} in ${params.city}. Category: ${params.category}. Vibe: ${params.vibe}. Use only real, existing place names. One short sentence each.`;
+
+  const systemPrompt = LANG === 'tr'
+    ? 'Sen deneyimli bir yerel seyahat rehberisin. Gerçek mekan adları önerirsin.'
+    : 'You are an expert local travel guide. You suggest real, specific places.';
+
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 1024,
+      system: systemPrompt,
+      tools: [ALTERNATIVES_TOOL],
+      tool_choice: { type: 'tool', name: 'suggest_alternatives' },
+      messages: [{ role: 'user', content: userPrompt }]
+    })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Alternatives API error (${response.status}): ${errText}`);
+  }
+
+  const data = await response.json();
+  const toolUse = data.content?.find((b: any) => b.type === 'tool_use');
+  if (!toolUse) throw new Error('No alternatives generated.');
+  const alts = (toolUse.input?.alternatives || []) as AlternativeSpot[];
+  return alts.slice(0, 3);
+}

@@ -35,6 +35,10 @@ export interface DayPlan {
   morning: ActivityBlock;
   afternoon: ActivityBlock;
   evening: ActivityBlock;
+  // When the user edits a plan we switch to a flexible, ordered list of spots.
+  // Read paths fall back to morning/afternoon/evening when this is absent.
+  spots?: ActivityBlock[];
+  order?: number;
 }
 
 export interface UserPreferences {
@@ -73,6 +77,9 @@ export interface PlaceDetails {
 }
 
 export interface ActivityBlock {
+  id?: string;            // stable id for editor drag/drop & list keys
+  time?: string;          // "09:30" — editable per-spot start time
+  order?: number;         // explicit ordering within a day's spots
   title: string;
   description: string;
   type: 'sight' | 'food' | 'activity' | 'transport' | 'rest';
@@ -94,6 +101,7 @@ export interface TripPlan {
   days_plan: DayPlan[];
   recommendedHotelArea: string; // "Stay in Le Marais"
   tips: string[];
+  editedAt?: string;            // ISO timestamp set when a plan is edited & saved
 }
 
 export interface Hotel {

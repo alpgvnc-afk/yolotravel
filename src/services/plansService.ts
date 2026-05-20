@@ -148,3 +148,28 @@ export const sharingEnabled = isSupabaseConfigured;
 // ────────────────────────────────────────────────────────────────────────────
 export const generatePlanId = generateShareCode;
 export const normalizePlanId = normalizeShareCode;
+
+/**
+ * Update an existing shared plan in place. The share_code stays the same —
+ * only plan_data (jsonb) and edited_at change. Used by the Plan Editor.
+ */
+export const updatePlan = async (
+  shareCode: string,
+  planData: SharedPlanPayload
+): Promise<void> => {
+  const code = normalizeShareCode(shareCode);
+  if (!code) throw new Error('Invalid share code.');
+
+  const supabase = getSupabase();
+  if (!supabase) {
+    throw new Error('Supabase is not configured.');
+  }
+
+  const editedAt = new Date().toISOString();
+  const { error } = await supabase
+    .from(TRIP_PLANS_TABLE)
+    .update({ plan_data: planData, edited_at: editedAt })
+    .eq('share_code', code);
+
+  if (error) throw new Error(`Could not update plan: ${error.message}`);
+};
