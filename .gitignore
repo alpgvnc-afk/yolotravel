@@ -12,3 +12,6 @@ coverage/
 # Unrelated nested projects that shouldn't ship with YoloTravel
 awesome-travel/
 github-projeler/
+
+.vercel
+.env*.local

@@ -1,4 +1,4 @@
-import { useEffect, useState, ReactNode } from 'react';
+import { useEffect, useMemo, useState, ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, Loader2, MapPin, Clock, DollarSign, Sun, Sunset, Moon, Hotel, Lightbulb, Calendar, Star, ExternalLink, BedDouble } from 'lucide-react';
 import { TripCard, TripPlan, ActivityBlock } from '../types';
@@ -76,6 +76,27 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
   });
 
   const [variantSeed, setVariantSeed] = useState(0);
+
+  // Real Places photos (name + photoUrl) for the shareable card —
+  // flattened from every day's activity blocks, deduped, first few only.
+  const sharePlaces = useMemo(() => {
+    if (!plan) return [] as { name: string; photoUrl: string }[];
+    const seen = new Set<string>();
+    const out: { name: string; photoUrl: string }[] = [];
+    for (const day of plan.days_plan) {
+      for (const block of [day.morning, day.afternoon, day.evening]) {
+        const url = block.placeDetails?.photoUrl;
+        if (!url) continue;
+        const name = block.placeDetails?.name || block.title;
+        const key = name.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push({ name, photoUrl: url });
+        if (out.length >= 6) return out;
+      }
+    }
+    return out;
+  }, [plan]);
 
   useEffect(() => {
     let cancelled = false;
@@ -541,7 +562,16 @@ export default function ItineraryScreen({ card, onBack, onViewHotels }: Itinerar
           </div>
 
           {/* Shareable plan card — only shown after Supabase save succeeds */}
-          {planId && <ShareCard card={card} plan={plan} planId={planId} />}
+          {planId && (
+            <ShareCard
+              city={card.city}
+              country={card.country}
+              days={card.days}
+              vibe={card.vibe}
+              shareCode={planId}
+              places={sharePlaces}
+            />
+          )}
           {saveError && !planId && (
             <div className="mx-6 mt-4 rounded-xl bg-amber-500/10 border border-amber-500/30 px-4 py-2 text-xs text-amber-300">
               {LANG === 'tr'
